@@ -21,12 +21,11 @@ const generateRecommendations = async (employeeData) => {
         const response = await axios.post(
             'https://openrouter.ai/api/v1/chat/completions',
             {
-                model: 'meta-llama/llama-3-8b-instruct:free',
+                model: 'arcee-ai/trinity-large-thinking:free',
                 messages: [
                     { role: 'system', content: 'You are an HR AI Assistant that outputs strictly valid JSON.' },
                     { role: 'user', content: prompt }
-                ],
-                response_format: { type: 'json_object' }
+                ]
             },
             {
                 headers: {
@@ -38,7 +37,14 @@ const generateRecommendations = async (employeeData) => {
             }
         );
 
-        const aiOutput = response.data.choices[0].message.content;
+        let aiOutput = response.data.choices[0].message.content;
+        
+        // Try to extract JSON if it's wrapped in markdown blocks
+        const jsonMatch = aiOutput.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+            aiOutput = jsonMatch[0];
+        }
+
         return JSON.parse(aiOutput);
 
     } catch (error) {
