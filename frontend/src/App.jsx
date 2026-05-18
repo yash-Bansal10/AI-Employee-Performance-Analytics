@@ -2,10 +2,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
+import AIRecommendations from './pages/AIRecommendations';
 import ProtectedRoute from './components/ProtectedRoute';
-
-// Placeholder components (To be implemented in future parts)
-const AIRecommendations = () => <div className="main-content"><h2>AI Recommendations Placeholder</h2></div>;
 
 function App() {
   return (
