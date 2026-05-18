@@ -1,15 +1,22 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const connectDB = require('./config/db');
 
 // Load environment variables
 dotenv.config();
+
+// Connect to database
+connectDB();
 
 const app = express();
 
 // Middleware
 app.use(cors()); // Allow cross-origin requests
 app.use(express.json()); // Parse JSON bodies
+
+// Routes
+app.use('/api/employees', require('./routes/employeeRoutes'));
 
 // Basic route for testing
 app.get('/', (req, res) => {
