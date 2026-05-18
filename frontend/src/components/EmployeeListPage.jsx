@@ -1,4 +1,19 @@
-const EmployeeListPage = ({ employees, loading }) => {
+import { useState } from 'react';
+
+const EmployeeListPage = ({ employees, loading, onDelete, onUpdateScore }) => {
+    const [editScoreId, setEditScoreId] = useState(null);
+    const [tempScore, setTempScore] = useState('');
+
+    const handleEditClick = (emp) => {
+        setEditScoreId(emp._id);
+        setTempScore(emp.performanceScore);
+    };
+
+    const handleSaveScore = (id) => {
+        onUpdateScore(id, Number(tempScore));
+        setEditScoreId(null);
+    };
+
     if (loading) {
         return <div className="glass-card" style={{ textAlign: 'center', padding: '3rem' }}>Loading employees...</div>;
     }
@@ -26,8 +41,23 @@ const EmployeeListPage = ({ employees, loading }) => {
                                 <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>{emp.department}</span>
                             </div>
                         </div>
-                        <div className="badge" style={{ backgroundColor: 'var(--accent-primary)', color: 'var(--bg-color)', fontWeight: 'bold' }}>
-                            {emp.performanceScore} / 100
+                        
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.5rem' }}>
+                            {editScoreId === emp._id ? (
+                                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                                    <input 
+                                        type="number" 
+                                        value={tempScore} 
+                                        onChange={(e) => setTempScore(e.target.value)} 
+                                        style={{ width: '60px', padding: '0.2rem', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}
+                                    />
+                                    <button onClick={() => handleSaveScore(emp._id)} className="badge badge-success" style={{ cursor: 'pointer', border: 'none' }}>Save</button>
+                                </div>
+                            ) : (
+                                <div className="badge" style={{ backgroundColor: 'var(--accent-primary)', color: 'var(--bg-color)', fontWeight: 'bold' }}>
+                                    {emp.performanceScore} / 100
+                                </div>
+                            )}
                         </div>
                     </div>
 
@@ -42,6 +72,17 @@ const EmployeeListPage = ({ employees, loading }) => {
                                 {skill}
                             </span>
                         ))}
+                    </div>
+                    
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', marginTop: '0.5rem', borderTop: '1px solid var(--border-color)', paddingTop: '0.5rem' }}>
+                        {editScoreId !== emp._id && (
+                            <button onClick={() => handleEditClick(emp)} style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '0.8rem' }}>
+                                Edit Score
+                            </button>
+                        )}
+                        <button onClick={() => onDelete(emp._id)} style={{ background: 'transparent', border: 'none', color: '#f87171', cursor: 'pointer', fontSize: '0.8rem' }}>
+                            Delete
+                        </button>
                     </div>
 
                 </div>

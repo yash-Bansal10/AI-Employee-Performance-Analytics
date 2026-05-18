@@ -67,8 +67,51 @@ const searchEmployees = async (req, res) => {
     }
 };
 
+// @desc    Delete employee
+// @route   DELETE /api/employees/:id
+// @access  Protected
+const deleteEmployee = async (req, res) => {
+    try {
+        const employee = await Employee.findById(req.params.id);
+        if (!employee) {
+            return res.status(404).json({ message: 'Employee not found' });
+        }
+        await employee.deleteOne();
+        res.status(200).json({ message: 'Employee removed successfully' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc    Update employee performance score
+// @route   PUT /api/employees/:id/score
+// @access  Protected
+const updateEmployeeScore = async (req, res) => {
+    try {
+        const { performanceScore } = req.body;
+        const employee = await Employee.findById(req.params.id);
+        
+        if (!employee) {
+            return res.status(404).json({ message: 'Employee not found' });
+        }
+
+        if (performanceScore === undefined || performanceScore < 0 || performanceScore > 100) {
+            return res.status(400).json({ message: 'Provide a valid performance score between 0 and 100' });
+        }
+
+        employee.performanceScore = performanceScore;
+        const updatedEmployee = await employee.save();
+        
+        res.status(200).json(updatedEmployee);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 module.exports = {
     addEmployee,
     getEmployees,
-    searchEmployees
+    searchEmployees,
+    deleteEmployee,
+    updateEmployeeScore
 };

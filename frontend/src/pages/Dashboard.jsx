@@ -2,11 +2,14 @@ import { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import EmployeeRegistrationForm from '../components/EmployeeRegistrationForm';
 import EmployeeListPage from '../components/EmployeeListPage';
+import SearchFilter from '../components/SearchFilter';
 import API from '../utils/api';
 
 const Dashboard = () => {
     const [employees, setEmployees] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [departmentFilter, setDepartmentFilter] = useState('');
 
     const fetchEmployees = async () => {
         try {
@@ -28,6 +31,34 @@ const Dashboard = () => {
     const handleEmployeeAdded = (newEmployee) => {
         setEmployees([newEmployee, ...employees]);
     };
+
+    const handleDeleteEmployee = async (id) => {
+        if (!window.confirm('Are you sure you want to delete this employee?')) return;
+        try {
+            await API.delete(`/api/employees/${id}`);
+            setEmployees(employees.filter(emp => emp._id !== id));
+        } catch (error) {
+            console.error('Failed to delete employee:', error);
+            alert('Failed to delete employee');
+        }
+    };
+
+    const handleUpdateScore = async (id, newScore) => {
+        try {
+            const { data } = await API.put(`/api/employees/${id}/score`, { performanceScore: newScore });
+            setEmployees(employees.map(emp => emp._id === id ? data : emp));
+        } catch (error) {
+            console.error('Failed to update score:', error);
+            alert('Failed to update score');
+        }
+    };
+
+    // Filter Logic
+    const filteredEmployees = employees.filter(emp => {
+        const matchesName = emp.name.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesDept = departmentFilter ? emp.department === departmentFilter : true;
+        return matchesName && matchesDept;
+    });
 
     // Calculate dynamic stats
     const avgScore = employees.length > 0 
@@ -71,11 +102,19 @@ const Dashboard = () => {
 
                     {/* Right Column: List */}
                     <div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                            <h2 style={{ fontSize: '1.5rem' }}>Employee Directory</h2>
-                            {/* Search/Filter will go here in Part 4 */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', gap: '1rem', flexWrap: 'wrap' }}>
+                            <h2 style={{ fontSize: '1.5rem', margin: 0 }}>Employee Directory</h2>
+                            <SearchFilter 
+                                searchQuery={searchQuery} setSearchQuery={setSearchQuery}
+                                departmentFilter={departmentFilter} setDepartmentFilter={setDepartmentFilter}
+                            />
                         </div>
-                        <EmployeeListPage employees={employees} loading={loading} />
+                        <EmployeeListPage 
+                            employees={filteredEmployees} 
+                            loading={loading} 
+                            onDelete={handleDeleteEmployee}
+                            onUpdateScore={handleUpdateScore}
+                        />
                     </div>
 
                 </div>
